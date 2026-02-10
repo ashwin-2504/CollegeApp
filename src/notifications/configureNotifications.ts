@@ -1,6 +1,7 @@
 import * as Notifications from 'expo-notifications';
 import { getTimetableRuntimeSnapshot } from '../modules/timetable/services/timetableRuntime';
 import { TimetableRuntimeResult } from '../modules/timetable/types';
+import { reconcileNotificationSchedule } from './scheduler';
 
 let latestLectureSnapshot: TimetableRuntimeResult = {
   currentLecture: null,

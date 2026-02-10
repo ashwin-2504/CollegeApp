@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   Alert,
   Pressable,
@@ -9,6 +9,7 @@ import {
   View,
 } from 'react-native';
 import { ModuleShell } from '../../ui/components/ModuleShell';
+import { createActionItem, listActionItems } from '../../storage';
 import {
   formatFriendlyDate,
   getTodayDateString,
@@ -27,6 +28,7 @@ function createActionItemId() {
 
 export function PersonalActionManagerScreen() {
   const [items, setItems] = useState<ActionItem[]>([]);
+  const [loading, setLoading] = useState(true);
   const [taskText, setTaskText] = useState('');
   const [deadlineIntent, setDeadlineIntent] = useState<DeadlineIntent>('none');
   const [dateInput, setDateInput] = useState('');
@@ -38,6 +40,16 @@ export function PersonalActionManagerScreen() {
   const nowItems = useMemo(() => selectNowItems(items), [items]);
   const upcomingGroups = useMemo(() => selectUpcomingGroups(items), [items]);
   const unscheduledItems = useMemo(() => selectUnscheduledItems(items), [items]);
+
+  useEffect(() => {
+    const hydrateItems = async () => {
+      const storedItems = await listActionItems();
+      setItems(storedItems);
+      setLoading(false);
+    };
+
+    hydrateItems();
+  }, []);
 
   const handleIntentChange = (intent: DeadlineIntent) => {
     setDeadlineIntent(intent);
@@ -60,7 +72,7 @@ export function PersonalActionManagerScreen() {
     }
   };
 
-  const handleCreateTask = () => {
+  const handleCreateTask = async () => {
     const text = taskText.trim();
     const notes = notesInput.trim();
 
@@ -100,6 +112,7 @@ export function PersonalActionManagerScreen() {
       createdAt: new Date().toISOString(),
     };
 
+    await createActionItem(newItem);
     setItems((current) => [...current, newItem]);
     setTaskText('');
     setNotesInput('');
@@ -116,6 +129,7 @@ export function PersonalActionManagerScreen() {
     >
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.card}>
+          {loading ? <Text style={styles.placeholderText}>Loading saved tasks...</Text> : null}
           <Text style={styles.sectionTitle}>Create Task</Text>
           <Text style={styles.label}>Task text *</Text>
           <TextInput
@@ -240,13 +254,6 @@ export function PersonalActionManagerScreen() {
   );
 }
 
-function formatLecture(label: string, slot: LectureSlot | null): string {
-  if (!slot) {
-    return `${label}: None`;
-  }
-
-  return `${label}: ${slot.subjectCode} ${slot.subjectName} (${slot.startTime}-${slot.endTime})`;
-}
 
 const styles = StyleSheet.create({
   content: {
