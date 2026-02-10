@@ -1,0 +1,1 @@
+export { CollegeTimetableCalendarScreen } from './CollegeTimetableCalendarScreen';
