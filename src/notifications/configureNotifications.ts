@@ -1,5 +1,11 @@
 import * as Notifications from 'expo-notifications';
-import { reconcileNotificationSchedule } from './scheduler';
+import { getTimetableRuntimeSnapshot } from '../modules/timetable/services/timetableRuntime';
+import { TimetableRuntimeResult } from '../modules/timetable/types';
+
+let latestLectureSnapshot: TimetableRuntimeResult = {
+  currentLecture: null,
+  nextLecture: null,
+};
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -27,4 +33,13 @@ export async function configureNotifications(): Promise<void> {
 
   await Notifications.requestPermissionsAsync();
   await reconcileNotificationSchedule();
+  latestLectureSnapshot = await getTimetableRuntimeSnapshot();
+
+  // Placeholder for persistent notification wiring.
+  // Uses the same runtime resolver snapshot shown on home/timetable view.
+  await Promise.resolve();
+}
+
+export function getLatestLectureSnapshotForNotifications(): TimetableRuntimeResult {
+  return latestLectureSnapshot;
 }
