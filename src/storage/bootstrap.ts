@@ -6,6 +6,7 @@ const STORAGE_VERSION = '1';
 const BOOTSTRAP_DEFAULTS: Record<string, string> = {
   action_items: JSON.stringify([]),
   timetable_entries: JSON.stringify([]),
+  notification_schedule_state: JSON.stringify({ actionManager: {}, timetable: {} }),
 };
 
 export async function initializeOfflineStorage(): Promise<void> {
