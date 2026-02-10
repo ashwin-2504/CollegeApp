@@ -83,25 +83,30 @@ export function PersonalActionManagerScreen() {
 
     setTaskError(null);
 
-    const itemDate =
-      deadlineIntent === 'none'
-        ? undefined
-        : datePattern.test(dateInput)
-          ? dateInput
-          : undefined;
+    let resolvedDate: string | undefined;
 
-    if (deadlineIntent === 'date' && dateInput && !itemDate) {
-      setDateError('Use YYYY-MM-DD for date.');
-      return;
+    if (deadlineIntent === 'date') {
+      if (!dateInput) {
+        setDateError('Date is required.');
+        return;
+      }
+      if (!datePattern.test(dateInput)) {
+        setDateError('Use YYYY-MM-DD for date.');
+        return;
+      }
+      resolvedDate = dateInput;
+    } else if (deadlineIntent === 'time') {
+      if (dateInput && !datePattern.test(dateInput)) {
+        setDateError('Use YYYY-MM-DD for date.');
+        return;
+      }
+      resolvedDate = dateInput || getTodayDateString();
+
+      if (!timePattern.test(timeInput)) {
+        Alert.alert('Time required', 'Please provide time in HH:MM format.');
+        return;
+      }
     }
-
-    if (deadlineIntent === 'time' && !timePattern.test(timeInput)) {
-      Alert.alert('Time required', 'Please provide time in HH:MM format.');
-      return;
-    }
-
-    const resolvedDate =
-      deadlineIntent === 'time' ? itemDate ?? getTodayDateString() : itemDate;
 
     const newItem: ActionItem = {
       id: createActionItemId(),
@@ -230,12 +235,12 @@ export function PersonalActionManagerScreen() {
               <View key={group.date} style={styles.groupBlock}>
                 <Text style={styles.groupHeading}>{formatFriendlyDate(group.date)}</Text>
                 {group.items.map((item) => (
-                  <Text key={item.id} style={styles.itemText}>{`• ${item.text}`}</Text>
+                  <Text key={item.id} style={styles.itemText}>{`• ${item.time ? item.time + ' ' : ''}${item.text}`}</Text>
                 ))}
               </View>
             ))
           ) : (
-            <Text style={styles.placeholderText}>No date-only tasks scheduled.</Text>
+            <Text style={styles.placeholderText}>No tasks scheduled.</Text>
           )}
         </View>
 
