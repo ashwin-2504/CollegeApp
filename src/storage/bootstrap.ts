@@ -6,6 +6,7 @@ const STORAGE_VERSION = '2';
 const BOOTSTRAP_DEFAULTS: Record<string, string> = {
   action_items: JSON.stringify([]),
   timetable_entries: JSON.stringify([]),
+  notification_schedule_state: JSON.stringify({ actionManager: {}, timetable: {} }),
   timetable_record_v2: JSON.stringify(null),
 };
 

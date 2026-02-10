@@ -16,6 +16,23 @@ Notifications.setNotificationHandler({
 });
 
 export async function configureNotifications(): Promise<void> {
+  await Notifications.setNotificationChannelAsync('default', {
+    name: 'Default',
+    importance: Notifications.AndroidImportance.DEFAULT,
+    sound: null,
+    vibrationPattern: [0],
+  });
+
+  await Notifications.setNotificationChannelAsync('timetable-silent', {
+    name: 'Timetable Silent',
+    importance: Notifications.AndroidImportance.LOW,
+    sound: null,
+    vibrationPattern: [0],
+    lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
+  });
+
+  await Notifications.requestPermissionsAsync();
+  await reconcileNotificationSchedule();
   latestLectureSnapshot = await getTimetableRuntimeSnapshot();
 
   // Placeholder for persistent notification wiring.
