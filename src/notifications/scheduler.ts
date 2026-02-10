@@ -1,6 +1,6 @@
-import * as Notifications from 'expo-notifications';
-import { ActionItem } from '../modules/actions/types';
-import { listLectureSlots, listActionItems } from '../storage';
+import * as Notifications from "expo-notifications";
+import { ActionItem } from "../modules/actions/types";
+import { listLectureSlots, listActionItems } from "../storage";
 
 type NotificationRecord = {
   notificationId: string;
@@ -12,8 +12,8 @@ type NotificationState = {
   timetable: Record<string, NotificationRecord>;
 };
 
-const TIMETABLE_NOTIFICATION_ENTITY_KEY = 'timetable:current-next';
-const NOTIFICATION_STATE_KEY = 'notification_schedule_state_v2';
+const TIMETABLE_NOTIFICATION_ENTITY_KEY = "timetable:current-next";
+const NOTIFICATION_STATE_KEY = "notification_schedule_state_v2";
 const DATE_CRITICAL_NOTIFICATION_HOUR = 9;
 const DATE_CRITICAL_NOTIFICATION_MINUTE = 0;
 
@@ -25,7 +25,10 @@ const EMPTY_STATE: NotificationState = {
 let inMemoryState: NotificationState = EMPTY_STATE;
 
 export async function reconcileNotificationSchedule(): Promise<void> {
-  const [actionItems, lectureSlots] = await Promise.all([listActionItems(), listLectureSlots()]);
+  const [actionItems, lectureSlots] = await Promise.all([
+    listActionItems(),
+    listLectureSlots(),
+  ]);
 
   const previousState = inMemoryState;
   const nextState: NotificationState = {
@@ -71,16 +74,18 @@ async function reconcileActionManagerNotifications(
     }
 
     if (previous) {
-      await Notifications.cancelScheduledNotificationAsync(previous.notificationId);
+      await Notifications.cancelScheduledNotificationAsync(
+        previous.notificationId,
+      );
     }
 
     const notificationId = await Notifications.scheduleNotificationAsync({
       content: {
-        title: 'Action due',
+        title: "Action due",
         body: item.text,
         sound: false,
       },
-      trigger: scheduleDate,
+      trigger: scheduleDate as any,
     });
 
     nextMap[entityKey] = { notificationId, fingerprint };
@@ -103,13 +108,16 @@ async function reconcileTimetableNotification(
     return minutesNow >= start && minutesNow < end;
   });
 
-  const next = todaySlots.find((slot) => toMinutes(slot.startTime) > now.getHours() * 60 + now.getMinutes());
+  const next = todaySlots.find(
+    (slot) =>
+      toMinutes(slot.startTime) > now.getHours() * 60 + now.getMinutes(),
+  );
 
   const displayText = current
     ? `Now: ${current.subjectName} until ${current.endTime}`
     : next
       ? `Next: ${next.subjectName} at ${next.startTime}`
-      : 'No upcoming lectures today';
+      : "No upcoming lectures today";
 
   const transitionPoints = new Set<number>();
   for (const slot of todaySlots) {
@@ -126,7 +134,7 @@ async function reconcileTimetableNotification(
   }
 
   const orderedTransitionPoints = [...transitionPoints].sort((a, b) => a - b);
-  const fingerprint = `timetable:${displayText}:${orderedTransitionPoints.join(',')}`;
+  const fingerprint = `timetable:${displayText}:${orderedTransitionPoints.join(",")}`;
   const previous = previousMap[TIMETABLE_NOTIFICATION_ENTITY_KEY];
 
   if (previous && previous.fingerprint === fingerprint) {
@@ -135,12 +143,14 @@ async function reconcileTimetableNotification(
   }
 
   if (previous) {
-    await Notifications.cancelScheduledNotificationAsync(previous.notificationId);
+    await Notifications.cancelScheduledNotificationAsync(
+      previous.notificationId,
+    );
   }
 
   const notificationId = await Notifications.scheduleNotificationAsync({
     content: {
-      title: 'Timetable',
+      title: "Timetable",
       body: displayText,
       sound: false,
       sticky: true,
@@ -153,12 +163,12 @@ async function reconcileTimetableNotification(
   for (const transitionTime of orderedTransitionPoints) {
     await Notifications.scheduleNotificationAsync({
       content: {
-        title: 'Timetable',
-        body: 'Refreshing lecture status…',
+        title: "Timetable",
+        body: "Refreshing lecture status…",
         sound: false,
         priority: Notifications.AndroidNotificationPriority.MIN,
       },
-      trigger: new Date(transitionTime),
+      trigger: new Date(transitionTime) as any,
     });
   }
 
@@ -175,7 +185,9 @@ async function cancelStaleNotifications(
   ) => {
     for (const [entityKey, record] of Object.entries(previousMap)) {
       if (!nextMap[entityKey]) {
-        await Notifications.cancelScheduledNotificationAsync(record.notificationId);
+        await Notifications.cancelScheduledNotificationAsync(
+          record.notificationId,
+        );
       }
     }
   };
@@ -195,15 +207,16 @@ function getActionItemScheduleDate(item: ActionItem): Date | null {
 
   return parseLocalDateTime(
     item.date,
-    `${DATE_CRITICAL_NOTIFICATION_HOUR.toString().padStart(2, '0')}:${DATE_CRITICAL_NOTIFICATION_MINUTE
-      .toString()
-      .padStart(2, '0')}`,
+    `${DATE_CRITICAL_NOTIFICATION_HOUR.toString().padStart(2, "0")}:${DATE_CRITICAL_NOTIFICATION_MINUTE.toString().padStart(
+      2,
+      "0",
+    )}`,
   );
 }
 
 function parseLocalDateTime(datePart: string, timePart: string): Date | null {
-  const [year, month, day] = datePart.split('-').map(Number);
-  const [hours, minutes] = timePart.split(':').map(Number);
+  const [year, month, day] = datePart.split("-").map(Number);
+  const [hours, minutes] = timePart.split(":").map(Number);
 
   if (
     Number.isNaN(year) ||
@@ -219,15 +232,31 @@ function parseLocalDateTime(datePart: string, timePart: string): Date | null {
 }
 
 function getDayName(now: Date): string {
-  return ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][now.getDay()];
+  return [
+    "Sunday",
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+  ][now.getDay()];
 }
 
 function toMinutes(value: string): number {
-  const [hours, minutes] = value.split(':').map(Number);
+  const [hours, minutes] = value.split(":").map(Number);
   return hours * 60 + minutes;
 }
 
 function toTodayDate(time: string, now: Date): Date {
-  const [hours, minutes] = time.split(':').map(Number);
-  return new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours, minutes, 0, 0);
+  const [hours, minutes] = time.split(":").map(Number);
+  return new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate(),
+    hours,
+    minutes,
+    0,
+    0,
+  );
 }

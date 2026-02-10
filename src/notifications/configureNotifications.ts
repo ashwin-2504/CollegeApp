@@ -1,7 +1,7 @@
-import * as Notifications from 'expo-notifications';
-import { getTimetableRuntimeSnapshot } from '../modules/timetable/services/timetableRuntime';
-import { TimetableRuntimeResult } from '../modules/timetable/types';
-import { reconcileNotificationSchedule } from './scheduler';
+import * as Notifications from "expo-notifications";
+import { getTimetableRuntimeSnapshot } from "../modules/timetable/services/timetableRuntime";
+import { TimetableRuntimeResult } from "../modules/timetable/types";
+import { reconcileNotificationSchedule } from "./scheduler";
 
 let latestLectureSnapshot: TimetableRuntimeResult = {
   currentLecture: null,
@@ -13,19 +13,21 @@ Notifications.setNotificationHandler({
     shouldPlaySound: false,
     shouldSetBadge: false,
     shouldShowAlert: true,
+    shouldShowBanner: true,
+    shouldShowList: true,
   }),
 });
 
 export async function configureNotifications(): Promise<void> {
-  await Notifications.setNotificationChannelAsync('default', {
-    name: 'Default',
+  await Notifications.setNotificationChannelAsync("default", {
+    name: "Default",
     importance: Notifications.AndroidImportance.DEFAULT,
     sound: null,
     vibrationPattern: [0],
   });
 
-  await Notifications.setNotificationChannelAsync('timetable-silent', {
-    name: 'Timetable Silent',
+  await Notifications.setNotificationChannelAsync("timetable-silent", {
+    name: "Timetable Silent",
     importance: Notifications.AndroidImportance.LOW,
     sound: null,
     vibrationPattern: [0],
