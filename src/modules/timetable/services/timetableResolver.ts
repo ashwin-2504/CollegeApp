@@ -13,11 +13,19 @@ const DAY_NAMES = [
 export function resolveCurrentAndNextLecture(
   slots: LectureSlot[],
   now: Date = new Date(),
+  userBatch?: string,
 ): TimetableRuntimeResult {
   const todayName = DAY_NAMES[now.getDay()];
   const minutesNow = now.getHours() * 60 + now.getMinutes();
 
-  const todaySlots = slots.filter((slot) => slot.dayOfWeek === todayName);
+  const todaySlots = slots
+    .filter((slot) => slot.dayOfWeek === todayName)
+    .filter((slot) => {
+      if (userBatch) {
+        return !slot.batch || slot.batch === userBatch;
+      }
+      return !slot.batch;
+    });
 
   const currentLecture =
     todaySlots.find((slot) => {
