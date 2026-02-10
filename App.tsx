@@ -13,7 +13,12 @@ export default function App() {
   useEffect(() => {
     const setup = async () => {
         await initDatabase();
-        await registerForPushNotificationsAsync();
+        try {
+          await registerForPushNotificationsAsync();
+        } catch (e) {
+          // Push notifications not supported in Expo Go (SDK 53+), local notifications still work
+          console.log('Push notification setup skipped (Expo Go):', (e as Error).message);
+        }
         setDbInitialized(true);
     };
     setup();

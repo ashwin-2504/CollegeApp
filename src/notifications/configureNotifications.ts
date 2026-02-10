@@ -9,13 +9,13 @@ let latestLectureSnapshot: TimetableRuntimeResult = {
 };
 
 Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldPlaySound: false,
-    shouldSetBadge: false,
-    shouldShowAlert: true,
-    shouldShowBanner: true,
-    shouldShowList: true,
-  }),
+  handleNotification: async () =>
+    ({
+      shouldPlaySound: false,
+      shouldSetBadge: false,
+      shouldShowBanner: true,
+      shouldShowList: true,
+    }) as any,
 });
 
 export async function configureNotifications(): Promise<void> {
@@ -34,7 +34,12 @@ export async function configureNotifications(): Promise<void> {
     lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
   });
 
-  await Notifications.requestPermissionsAsync();
+  try {
+    await Notifications.requestPermissionsAsync();
+  } catch (e) {
+    // requestPermissionsAsync may fail in Expo Go (SDK 53+)
+    console.log("Notification permissions request skipped (Expo Go)");
+  }
   await reconcileNotificationSchedule();
   latestLectureSnapshot = await getTimetableRuntimeSnapshot();
 

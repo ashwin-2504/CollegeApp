@@ -3,13 +3,13 @@ import { Platform } from "react-native";
 import { ActionItem } from "../types";
 
 Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge: false,
-    shouldShowBanner: true,
-    shouldShowList: true,
-  }),
+  handleNotification: async () =>
+    ({
+      shouldPlaySound: true,
+      shouldSetBadge: false,
+      shouldShowBanner: true,
+      shouldShowList: true,
+    }) as any,
 });
 
 export async function registerForPushNotificationsAsync() {

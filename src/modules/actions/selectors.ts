@@ -39,9 +39,17 @@ export function selectNowItems(items: ActionItem[], now: Date = new Date()) {
     .sort((a, b) => timeToSortKey(a.time ?? '') - timeToSortKey(b.time ?? ''));
 }
 
-export function selectUpcomingGroups(items: ActionItem[]) {
+export function selectUpcomingGroups(items: ActionItem[], now: Date = new Date()) {
+  const today = getTodayDateString(now);
+
   const grouped = items
-    .filter((item) => Boolean(item.date) && !item.time)
+    .filter((item) => {
+      // Must have a date
+      if (!item.date) return false;
+      // Exclude "Now" items (Today AND has time)
+      if (item.date === today && item.time) return false;
+      return true;
+    })
     .reduce<Record<string, ActionItem[]>>((acc, item) => {
       const groupDate = item.date!;
       if (!acc[groupDate]) {
@@ -53,7 +61,14 @@ export function selectUpcomingGroups(items: ActionItem[]) {
 
   return Object.entries(grouped)
     .sort(([left], [right]) => left.localeCompare(right))
-    .map(([date, groupItems]) => ({ date, items: groupItems })) satisfies UpcomingGroup[];
+    .map(([date, groupItems]) => ({
+      date,
+      items: groupItems.sort((a, b) => {
+        const timeA = a.time ? timeToSortKey(a.time) : Number.MAX_SAFE_INTEGER;
+        const timeB = b.time ? timeToSortKey(b.time) : Number.MAX_SAFE_INTEGER;
+        return timeA - timeB;
+      }),
+    })) satisfies UpcomingGroup[];
 }
 
 export function selectUnscheduledItems(items: ActionItem[]) {

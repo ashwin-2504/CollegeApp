@@ -40,7 +40,7 @@ export function CollegeTimetableCalendarScreen() {
       return { currentLecture: null, nextLecture: null };
     }
 
-    return resolveCurrentAndNextLecture(record.slots);
+    return resolveCurrentAndNextLecture(record.slots, new Date(), record.selection.batch);
   }, [record]);
 
   const hasSelection = className.trim().length > 0 && division.trim().length > 0;
