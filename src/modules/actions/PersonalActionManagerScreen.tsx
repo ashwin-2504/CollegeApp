@@ -240,6 +240,14 @@ export function PersonalActionManagerScreen() {
   );
 }
 
+function formatLecture(label: string, slot: LectureSlot | null): string {
+  if (!slot) {
+    return `${label}: None`;
+  }
+
+  return `${label}: ${slot.subjectCode} ${slot.subjectName} (${slot.startTime}-${slot.endTime})`;
+}
+
 const styles = StyleSheet.create({
   content: {
     gap: 12,
