@@ -82,7 +82,7 @@ export default function TimetableScreen() {
             styles.setupButton,
             { backgroundColor: colors.primary, opacity: pressed ? 0.85 : 1 },
           ]}
-          onPress={() => router.push("/timetable/setup")}
+          onPress={() => router.push("/timetable/create")}
         >
           <FontAwesome name="plus" size={16} color="#fff" />
           <Text style={styles.setupButtonText}>Set Up Timetable</Text>

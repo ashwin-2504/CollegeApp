@@ -103,3 +103,32 @@ export async function hasLectureSlots(db: SQLiteDatabase): Promise<boolean> {
   );
   return (row?.count ?? 0) > 0;
 }
+
+/** Atomically replace all slots: clear + bulk insert in one transaction */
+export async function replaceAllSlots(
+  db: SQLiteDatabase,
+  inputs: CreateLectureSlotInput[],
+): Promise<void> {
+  await db.withTransactionAsync(async () => {
+    await db.runAsync("DELETE FROM lecture_slots");
+    for (const input of inputs) {
+      const id = generateId();
+      await db.runAsync(
+        `INSERT INTO lecture_slots (id, day_of_week, start_time, end_time, subject_code, subject_name, faculty, location, type, batch)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          id,
+          input.dayOfWeek,
+          input.startTime,
+          input.endTime,
+          input.subjectCode,
+          input.subjectName,
+          input.faculty,
+          input.location,
+          input.type,
+          input.batch,
+        ],
+      );
+    }
+  });
+}

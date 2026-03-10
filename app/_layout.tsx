@@ -115,6 +115,15 @@ function RootLayoutNav() {
                 headerTintColor: Colors.dark.text,
               }}
             />
+            <Stack.Screen
+              name="timetable/create"
+              options={{
+                title: "Create Timetable",
+                presentation: "modal",
+                headerStyle: { backgroundColor: Colors.dark.surface },
+                headerTintColor: Colors.dark.text,
+              }}
+            />
           </Stack>
         </SQLiteProvider>
       </Suspense>
